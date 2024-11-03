@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Ensure the script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+# Update package list and upgrade packages
+echo "Updating package list..."
+apt update && apt upgrade
+
+# Install KDE Plasma Desktop and SDDM (Simple Desktop Display Manager)
+echo "Installing KDE Plasma Desktop..."
+apt install kde-plasma-desktop sddm
+
+# Enable SDDM as the default display manager
+echo "Configuring SDDM as the default display manager..."
+systemctl enable sddm.service
+systemctl start sddm.service
+
+# Install Firefox
+echo "Installing Firefox..."
+apt install firefox-esr
+
+# Confirm installations and services
+echo "Verifying KDE Plasma and Firefox installations..."
+if dpkg -l | grep -q "kde-plasma-desktop"; then
+    echo "KDE Plasma Desktop installed successfully."
+else
+    echo "Error installing KDE Plasma Desktop."
+fi
+
+if dpkg -l | grep -q "firefox-esr"; then
+    echo "Firefox installed successfully."
+else
+    echo "Error installing Firefox."
+fi
+
+# Check and confirm SDDM service status
+if systemctl is-active --quiet sddm.service; then
+    echo "SDDM service is active and enabled to start at boot."
+else
+    echo "SDDM service failed to start. You may need to troubleshoot."
+fi
+
+echo "Installation complete. You can now reboot to start KDE Plasma."
